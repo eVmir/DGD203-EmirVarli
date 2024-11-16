@@ -1,0 +1,202 @@
+ */
+* Name: Emir
+ * Surname: Varlı
+ * Student Number: 225040058
+ * Course: Game Proggramming 1
+ * Date: 16.11.2024
+ */
+
+using System;
+using System.Collections.Generic;
+
+namespace CarGame
+{
+    // Base class for Car Parts
+    interface ICarPart
+    {
+        string Status { get; }
+    }
+
+    // Engine Class
+    class Engine : ICarPart
+    {
+        public int Horsepower { get; private set; }
+        public bool IsRunning { get; private set; }
+        public string Status => IsRunning ? "Engine is running" : "Engine is off";
+
+        public Engine(int horsepower)
+        {
+            Horsepower = horsepower;
+            IsRunning = false;
+        }
+
+        public void Start()
+        {
+            IsRunning = true;
+            Console.WriteLine("Engine started.");
+        }
+
+        public void Stop()
+        {
+            IsRunning = false;
+            Console.WriteLine("Engine stopped.");
+        }
+    }
+
+    // Fuel Tank Class
+    class FuelTank : ICarPart
+    {
+        public float Capacity { get; private set; }
+        public float CurrentFuel { get; private set; }
+        public string Status => $"Fuel level: {CurrentFuel}/{Capacity} liters";
+
+        public FuelTank(float capacity)
+        {
+            Capacity = capacity;
+            CurrentFuel = capacity;
+        }
+
+        public bool ConsumeFuel(float amount)
+        {
+            if (CurrentFuel >= amount)
+            {
+                CurrentFuel -= amount;
+                return true;
+            }
+            Console.WriteLine("Not enough fuel!");
+            return false;
+        }
+
+        public void Refuel(float amount)
+        {
+            CurrentFuel = Math.Min(CurrentFuel + amount, Capacity);
+            Console.WriteLine($"Refueled. Current fuel: {CurrentFuel} liters");
+        }
+    }
+
+    // Wheel Class
+    class Wheel : ICarPart
+    {
+        public string Type { get; private set; } // e.g., Summer, Winter, All-Season
+        public bool IsFlat { get; private set; }
+        public string Status => IsFlat ? "Flat tire" : "Tire in good condition";
+
+        public Wheel(string type)
+        {
+            Type = type;
+            IsFlat = false;
+        }
+
+        public void Puncture()
+        {
+            IsFlat = true;
+            Console.WriteLine("The tire is flat!");
+        }
+
+        public void Repair()
+        {
+            IsFlat = false;
+            Console.WriteLine("The tire has been repaired.");
+        }
+    }
+
+    // Seat Class
+    class Seat : ICarPart
+    {
+        public bool IsOccupied { get; private set; }
+        public string Status => IsOccupied ? "Occupied" : "Available";
+
+        public Seat()
+        {
+            IsOccupied = false;
+        }
+
+        public void Occupy()
+        {
+            IsOccupied = true;
+            Console.WriteLine("Seat is now occupied.");
+        }
+
+        public void Vacate()
+        {
+            IsOccupied = false;
+            Console.WriteLine("Seat is now available.");
+        }
+    }
+
+    // Car Class
+    class Car
+    {
+        public Engine Engine { get; private set; }
+        public FuelTank FuelTank { get; private set; }
+        public List<Wheel> Wheels { get; private set; }
+        public List<Seat> Seats { get; private set; }
+
+        public Car(int horsepower, float fuelCapacity, int seatCount, string wheelType)
+        {
+            Engine = new Engine(horsepower);
+            FuelTank = new FuelTank(fuelCapacity);
+            Wheels = new List<Wheel> { new Wheel(wheelType), new Wheel(wheelType), new Wheel(wheelType), new Wheel(wheelType) };
+            Seats = new List<Seat>();
+            for (int i = 0; i < seatCount; i++)
+            {
+                Seats.Add(new Seat());
+            }
+        }
+
+        public void StartCar()
+        {
+            if (FuelTank.CurrentFuel > 0)
+            {
+                Engine.Start();
+            }
+            else
+            {
+                Console.WriteLine("Not enough fuel to start the car!");
+            }
+        }
+
+        public void Drive(float distance)
+        {
+            float fuelNeeded = distance * 0.1f; // Assume 10 km per liter
+            if (Engine.IsRunning && FuelTank.ConsumeFuel(fuelNeeded))
+            {
+                Console.WriteLine($"Car drove {distance} km.");
+            }
+            else
+            {
+                Console.WriteLine("Cannot drive. Check engine or fuel.");
+            }
+        }
+
+        public void StopCar()
+        {
+            Engine.Stop();
+        }
+
+        public void GetCarStatus()
+        {
+            Console.WriteLine("Car Status:");
+            Console.WriteLine($"- {Engine.Status}");
+            Console.WriteLine($"- {FuelTank.Status}");
+            Console.WriteLine($"- Wheels: {string.Join(", ", Wheels.ConvertAll(w => w.Status))}");
+            Console.WriteLine($"- Seats: {string.Join(", ", Seats.ConvertAll(s => s.Status))}");
+        }
+    }
+
+    // Main Method
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Car myCar = new Car(200, 50, 4, "All-Season");
+
+            myCar.StartCar();
+            myCar.Drive(30);
+            myCar.GetCarStatus();
+            myCar.StopCar();
+
+            myCar.FuelTank.Refuel(20);
+            myCar.GetCarStatus();
+        }
+    }
